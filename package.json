@@ -1,0 +1,21 @@
+{
+  "name": "github-bot-jira",
+  "version": "1.0.0",
+  "description": "XCaliber github bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/wdio ./wdio.conf.js",
+    "start": "node index.js"
+  },
+  "author": "XCaliber",
+  "license": "MIT",
+  "dependencies": {
+    "jira-client": "^6.4.1",
+    "socket.io-client": "^2.0.4",
+    "chromedriver": "^2.33.2",
+    "mocha": "^4.0.1",
+    "wdio-chromedriver-service": "~0.1",
+    "wdio-mocha-framework": "^0.5.11",
+    "webdriverio": "^4.9.11"
+  }
+}
