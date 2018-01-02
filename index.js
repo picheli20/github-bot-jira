@@ -121,7 +121,9 @@ function createFile(str, deployedUrl) {
   return `${urlVariables}
   const assert = require('assert');
   const pageObject = require('../page-object');
+  describe('Jira Automated Test', () => {
   ${str}
+  });
   `;
 }
 
