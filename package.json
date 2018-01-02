@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/wdio ./wdio.conf.js",
+    "playground": "npm run test -- --spec ./test/playground.js",
+    "playground:generate": "node extract.js",
     "start": "node index.js"
   },
   "author": "XCaliber",
