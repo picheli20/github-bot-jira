@@ -1,9 +1,16 @@
 const Input = require('../components/Input');
 
-const Login = {
-  email: new Input('xc-cres-login-form > form > div:nth-child(2) mat-form-field'),
-  password: new Input('xc-cres-login-form > form > div:nth-child(3) mat-form-field'),
-  loginButton: 'xc-cres-login-form > form > button'
-};
+module.exports = class Login {
+  constructor(selector = '') {
+    this.selector = `${selector} xc-cres-login-form`;
+    this.email = new Input(`${this.selector} > form > div:nth-child(2) mat-form-field`);
+    this.password = new Input(`${this.selector} > form > div:nth-child(3) mat-form-field`);
+    this.loginButton = `${this.selector} > form > button`;
+  }
 
-module.exports = Login;
+  doLogin(email, password) {
+    browser.setValue(this.email.input, email);
+    browser.setValue(this.password.input, password);
+    browser.click(this.loginButton);
+  }
+};

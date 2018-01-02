@@ -8,7 +8,8 @@ describe('Jira Automated Test', () => {
 // Default header - Change only the URL value if necessary
 
   it ('should test button of component X', () => {
-    pageObject.util.login(URL_CRES, 'john.doe', 'urmom');
+    browser.url(URL_CRES);
+    pageObject.Header.doLogin('john.doe', 'urmom');
     /** code */
     assert.equal(true, true);
   });

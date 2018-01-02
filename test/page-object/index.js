@@ -5,17 +5,15 @@ const SideBar = require('./sections/SideBar');
 const Login = require('./sections/Login');
 const Wallet = require('./sections/Wallet');
 const Register = require('./sections/Register');
-const util = require('./util');
 
 const pageObject = {
   Offers: new Offers(),
   Promotion,
-  Header,
+  Header: new Header(),
   SideBar,
-  Login,
+  Login: new Login(),
   Wallet,
   Register,
-  util,
 };
 
 module.exports = pageObject;
