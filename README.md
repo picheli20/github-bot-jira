@@ -1,6 +1,6 @@
 # Getting started
 
-### Create automated testes using [webdriver](http://webdriver.io/api.html) and [mochajs](https://mochajs.org/).
+#### Create automated testes using [webdriver](http://webdriver.io/api.html) and [mochajs](https://mochajs.org/).
 
 
 - Add this pattern on Jira description
