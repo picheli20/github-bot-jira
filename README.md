@@ -1,6 +1,8 @@
 # Getting started
 
-To create automated testes using [webdriver](http://webdriver.io/api.html) and [mochajs](https://mochajs.org/) follow this example:
+#### Create automated testes using [webdriver](http://webdriver.io/api.html) and [mochajs](https://mochajs.org/).
+
+
 - Add this pattern on Jira description
 ```
 +e2e test+
@@ -21,7 +23,7 @@ describe('My Description', () => {
 
 - You can use the pre-created functions of `test/page-object.js` as `pageObject` variable.
 
-# Contributing 
+## Contributing 
 For starting the server:
 ```
 npm run start
