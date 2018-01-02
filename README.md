@@ -23,7 +23,7 @@ describe('My Description', () => {
 
 - You can use the pre-created functions of `test/page-object.js` as `pageObject` variable.
 
-# Contributing 
+## Contributing 
 For starting the server:
 ```
 npm run start
