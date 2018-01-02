@@ -23,6 +23,10 @@ const pageObject = {
       visaBtn: 'xc-select-method > div > div:nth-child(1) > button',
     }
   },
+  Register: {
+    firstName: '#mat-input-1',
+    dateOfBirthInput: 'xc-register-form #mat-input-6',
+  },
   do: {
     login: (url, email, password) => {
       browser.url(url);
