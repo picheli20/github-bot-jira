@@ -57,7 +57,7 @@ socket.on('approved', data => {
 });
 
 
-socket.on('e2e:re-run', data => {
+socket.on('e2e:run', data => {
   data.issues.map(issue => {
     jira.findIssue(issue).then(issueObj => {
       runTest(processDescription(issueObj, issue), issue, data.deployedUrl, error => {
@@ -119,11 +119,9 @@ function createFile(str, deployedUrl) {
   }
 
   return `${urlVariables}
-  const assert = require('assert');
-  const pageObject = require('../page-object');
-  describe('Jira Automated Test', () => {
-  ${str}
-  });
+const assert = require('assert');
+const pageObject = require('../page-object');
+describe('Jira Automated Test', () => {\n${str}\n});
   `;
 }
 
