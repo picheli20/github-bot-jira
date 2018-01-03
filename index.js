@@ -37,13 +37,6 @@ socket.on('initialsetup', data => {
       transition: { id: STATUS.review }
     });
 
-
-    jira.findIssue(issue).then(issueObj => {
-      runTest(processDescription(issueObj, issue), issue, data.deployedUrl, error => {
-        if (error) socket.emit('e2e:fail', { pr: data.pr });
-        else socket.emit('e2e:success', { pr: data.pr });
-      });
-    });
   });
 });
 
@@ -52,6 +45,13 @@ socket.on('approved', data => {
     console.log(`[${issue}] approved`);
     jira.transitionIssue(issue, {
       transition: { id: STATUS.approved }
+    });
+
+    jira.findIssue(issue).then(issueObj => {
+      runTest(processDescription(issueObj, issue), issue, data.deployedUrl, error => {
+        if (error) socket.emit('e2e:fail', { pr: data.pr });
+        else socket.emit('e2e:success', { pr: data.pr });
+      });
     });
   });
 });
