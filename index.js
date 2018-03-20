@@ -2,10 +2,13 @@ const path = require('path');
 var fs = require('fs');
 const JiraApi =  require('jira-client');
 const childProcess = require('child_process');
+const axios = require('axios');
+const atob = require('atob');
 
 const config = require('./src/config');
 const server = config.socket.server || 'http://localhost:3000';
 const socket = require('socket.io-client')(server);
+const [username, password] = getCredentials(config.jira.auth);
 
 const STATUS = {
   review: 891,
@@ -14,45 +17,60 @@ const STATUS = {
   reopen: 821
 }
 
+
 const jira = new JiraApi({
   protocol: 'https',
   host: config.jira.server,
-  username: config.jira.username,
-  password: config.jira.password,
   apiVersion: '2',
-  strictSSL: true
+  strictSSL: true,
+  username,
+  password
 });
 
-socket.on('connect', () => console.log(`[log] Connected on ${server}`));
-socket.on('disconnect', () => console.log(`[log] Disconnect from the server`));
+socket.on('connect', () => console.log(`${getTime()} - [log] Connected on ${server}`));
+socket.on('disconnect', () => console.log(`${getTime()} - [log] Disconnect from the server`));
 
 socket.on('initialsetup', data => {
   data.issues.map(issue => {
-    console.log(`[${issue}] initial setup`);
+    console.log(`${getTime()} - [${issue}] initial setup`);
     jira.addComment(issue, data.comment);
 
-    // Replace ISSUE_ID
-    // https://jira.xcaliber.io/rest/api/2/issue/<ISSUE_ID>/transitions?expand=transitions.fields
-    jira.transitionIssue(issue, {
-      transition: { id: STATUS.review }
-    });
+
+    jira.findIssue(issue).then(issueObj => {
+      if (issueObj.fields.status.name.toLocaleLowerCase() !== 'in progress'){
+        return;
+      }
+
+      // Replace ISSUE_ID
+      // https://jira.xcaliber.io/rest/api/2/issue/<ISSUE_ID>/transitions?expand=transitions.fields
+      jira.transitionIssue(issue, {
+        transition: { id: STATUS.review }
+      });
+    }).catch(err => console.error(err));
 
   });
 });
 
 socket.on('approved', data => {
   data.issues.map(issue => {
-    console.log(`[${issue}] approved`);
-    jira.transitionIssue(issue, {
-      transition: { id: STATUS.approved }
-    });
+    console.log(`${getTime()} - [${issue}] approved`);
 
     jira.findIssue(issue).then(issueObj => {
-      runTest(processDescription(issueObj, issue), issue, data.deployedUrl, error => {
-        if (error) socket.emit('e2e:fail', { pr: data.pr });
-        else socket.emit('e2e:success', { pr: data.pr });
+      if (issueObj.fields.status.name.toLocaleLowerCase() !== 'in review'){
+        return;
+      }
+
+      jira.transitionIssue(issue, {
+        transition: { id: STATUS.approved }
       });
-    });
+    }).catch(err => console.error(err));
+
+    // jira.findIssue(issue).then(issueObj => {
+      // runTest(processDescription(issueObj, issue), issue, data.deployedUrl, error => {
+      //   if (error) socket.emit('e2e:fail', { pr: data.pr });
+      //   else socket.emit('e2e:success', { pr: data.pr });
+      // });
+    // });
   });
 });
 
@@ -68,19 +86,37 @@ socket.on('e2e:run', data => {
   });
 });
 
+// { branch: pr.head.ref }
+socket.on('screenshot:purge', data => {
+  console.log(`${getTime()} - [screenshot] purging ${data.branch}`);
+  axios.post(`${config.screenshotUrl}/purge`, data)
+    .then(resp => console.log(`${getTime()} - [screenshot] screenshot:create\n`, resp.data))
+    .catch(resp => console.log(`${getTime()} - [screenshot] Error screenshot:purge\n`, resp.data, `\t\t request:\n`, data ));
+});
+
+// { branch: pr.head.ref, skin, domain }
+socket.on('screenshot:create', data => {
+  console.log(`${getTime()} - [screenshot]  ${data.skin} - ${data.branch} (${data.domain})`);
+  axios.post(`${config.screenshotUrl}/screenshot`, data)
+    .then(resp => console.log(`${getTime()} - [screenshot] screenshot:create\n`, resp.data))
+    .catch(resp => console.log(`${getTime()} - [screenshot] Error screenshot:create\n`, resp.data, `\t\t request:\n`, data ));
+});
+
 socket.on('merged', data => {
   data.issues.map(issue => {
-    console.log(`[${issue}] merged`);
+    console.log(`${getTime()} - [${issue}] merged`);
 
-    // jira.findIssue(issue).then(issueObj => {
-    //   if (issueObj.fields.status.name.toLocaleLowerCase() !== 'resolved'){
-    //     return;
-    //   }
+  //   if (issue.startsWith('ELNEW')) {
+  //     jira.findIssue(issue).then(issueObj => {
+  //       if (issueObj.fields.status.name.toLocaleLowerCase() !== 'resolved'){
+  //         return;
+  //       }
 
-    //   jira.transitionIssue(issue, { transition: { id: STATUS.close } });
-    // }).catch(err => {
-    //   console.error(err);
-    // });
+  //       jira.transitionIssue(issue, { transition: { id: STATUS.close } });
+  //     }).catch(err => {
+  //       console.error(err);
+  //     });
+  //  }
   });
 });
 
@@ -91,7 +127,7 @@ function runTest(testString, issue, deployedUrl, callback) {
   fs.writeFile(file, createFile(testString, deployedUrl), (err) => {
     if(err) return console.log(err);
 
-    console.log(`[${issue}] Running e2e test`);
+    console.log(`${getTime()} - [${issue}] Running e2e test`);
     childProcess.execFile(
       `npm`, [ `test`, `--`, `--spec`, file ],
       (err, stdout, stderr) => {
@@ -105,7 +141,7 @@ function runTest(testString, issue, deployedUrl, callback) {
 function processDescription(issueObj, issue) {
   const e2eString = issueObj.fields.description.split('+e2e test+')[1];
   if(!e2eString) {
-    console.log(`[${issue}] No E2E tag found`);
+    console.log(`${getTime()} - [${issue}] No E2E tag found`);
     return;
   }
   return e2eString.match(/(?:{code:javascript}((?:.*?\r?\n?)*){code})+/g).map(val => val.replace(/{code:javascript}|{code}/g,''))[0];
@@ -125,6 +161,28 @@ describe('Jira Automated Test', () => {\n${str}\n});
   `;
 }
 
+function getCredentials(info) {
+  return atob(info).split(':');
+}
+
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function checkTime(i) {
+  if (i < 10) {
+    i = "0" + i;
+  }
+  return i;
+}
+
+function getTime() {
+  var today = new Date();
+  var h = today.getHours();
+  var m = today.getMinutes();
+  var s = today.getSeconds();
+  // add a zero in front of numbers<10
+  m = checkTime(m);
+  s = checkTime(s);
+  return h + ":" + m + ":" + s;
 }

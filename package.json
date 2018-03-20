@@ -12,10 +12,12 @@
   "author": "XCaliber",
   "license": "MIT",
   "dependencies": {
-    "jira-client": "^6.4.1",
-    "socket.io-client": "^2.0.4",
+    "atob": "^2.0.3",
+    "axios": "^0.17.1",
     "chromedriver": "^2.33.2",
+    "jira-client": "^6.4.1",
     "mocha": "^4.0.1",
+    "socket.io-client": "^2.0.4",
     "wdio-chromedriver-service": "~0.1",
     "wdio-mocha-framework": "^0.5.11",
     "webdriverio": "^4.9.11"
