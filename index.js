@@ -17,7 +17,6 @@ const STATUS = {
   reopen: 821
 }
 
-
 const jira = new JiraApi({
   protocol: 'https',
   host: config.jira.server,
@@ -84,6 +83,13 @@ socket.on('e2e:run', data => {
       });
     });
   });
+});
+
+// { branch: pr.head.ref }
+socket.on('falcon:create', data => {
+  axios.post(data.url, data.payload)
+    .then(resp => console.log(`${getTime()} - [falcon] Branch created, slug:`, data.payload.slug))
+    .catch(resp => console.log(`${getTime()} - [falcon] Error falcon:create: slug:`, data.payload.slug ));
 });
 
 // { branch: pr.head.ref }
