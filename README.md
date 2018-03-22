@@ -1,6 +1,13 @@
 # Getting started
 
-#### Create automated testes using [webdriver](http://webdriver.io/api.html) and [mochajs](https://mochajs.org/).
+```
+npm run start
+```
+
+Please check `src/config.js` to see the env variables.
+
+
+## Creating tests
 
 
 - You can use the `playground.js` file to create your test (just don't add stuff on the header or footer, change only the URL if necessary)
@@ -29,11 +36,3 @@ It looks like this:
 - Tests will be trigged when the respective PR is move to rft, if failed it will be provided a url to re-run the test.
 
 - You can use the pre-created functions/selectors of `test/page-object/index.js` as `pageObject` variable.
-
-## Contributing 
-For starting the server:
-```
-npm run start
-```
-
-Please check `src/config.js` to see the env variables.
