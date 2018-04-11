@@ -93,6 +93,13 @@ socket.on('falcon:create', data => {
 });
 
 // { branch: pr.head.ref }
+socket.on('falcon:destroy', data => {
+  axios.delete(`${data.url}${data.payload.slug}`)
+    .then(resp => console.log(`${getTime()} - [falcon] Branch destroyed, slug:`, data.payload.slug))
+    .catch(resp => console.log(`${getTime()} - [falcon] Error falcon:destroy slug:`, data.payload.slug ));
+});
+
+// { branch: pr.head.ref }
 socket.on('screenshot:purge', data => {
   console.log(`${getTime()} - [screenshot] purging ${data.branch}`);
   axios.post(`${config.screenshotUrl}/purge`, data)
